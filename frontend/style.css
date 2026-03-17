@@ -1,0 +1,185 @@
+body{
+font-family: Arial, Helvetica, sans-serif;
+background:#f4f6f8;
+margin:0;
+}
+
+
+/* NAVBAR */
+
+.navbar{
+background:#2c3e50;
+color:white;
+padding:15px 30px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.navbar button{
+background:#e74c3c;
+border:none;
+padding:8px 15px;
+color:white;
+border-radius:5px;
+cursor:pointer;
+}
+
+
+
+/* CONTAINER */
+
+.container{
+padding:40px;
+}
+
+
+
+/* LOAD BUTTON */
+
+.load-btn{
+background:#2ecc71;
+border:none;
+padding:10px 20px;
+color:white;
+border-radius:6px;
+cursor:pointer;
+margin-bottom:20px;
+}
+
+
+
+/* STATION GRID */
+
+#stations{
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
+gap:20px;
+}
+
+
+
+/* STATION CARD */
+
+.card{
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 5px 15px rgba(0,0,0,0.1);
+}
+
+.card h3{
+margin-top:0;
+}
+
+.card button{
+background:#3498db;
+border:none;
+padding:8px 12px;
+color:white;
+border-radius:5px;
+cursor:pointer;
+margin-top:10px;
+}
+
+
+
+/* SLOT BUTTON */
+
+.slot-btn{
+display:block;
+margin-top:6px;
+background:#2ecc71;
+border:none;
+padding:6px 10px;
+border-radius:5px;
+color:white;
+}
+
+
+
+/* BOOKINGS */
+
+.booking-card{
+background:white;
+padding:15px;
+margin-top:10px;
+border-radius:8px;
+box-shadow:0 3px 10px rgba(0,0,0,0.1);
+}
+
+.booking-card button{
+background:#e74c3c;
+border:none;
+padding:6px 10px;
+color:white;
+border-radius:5px;
+margin-top:5px;
+cursor:pointer;
+}
+
+/* LOGIN PAGE */
+
+.login-body{
+
+background: linear-gradient(135deg,#2c3e50,#4ca1af);
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+font-family: Arial, Helvetica, sans-serif;
+
+}
+
+.login-container{
+
+background:white;
+padding:40px;
+border-radius:12px;
+width:320px;
+text-align:center;
+box-shadow:0 10px 30px rgba(0,0,0,0.2);
+
+}
+
+.login-container h1{
+
+margin-bottom:25px;
+
+}
+
+.login-container input{
+
+width:100%;
+padding:10px;
+margin-bottom:15px;
+border-radius:6px;
+border:1px solid #ccc;
+
+}
+
+.login-container button{
+
+width:100%;
+padding:10px;
+background:#2ecc71;
+border:none;
+color:white;
+font-size:16px;
+border-radius:6px;
+cursor:pointer;
+
+}
+
+.login-container button:hover{
+
+background:#27ae60;
+
+}
+
+.login-container a{
+
+color:#3498db;
+text-decoration:none;
+
+}
