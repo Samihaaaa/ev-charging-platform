@@ -132,24 +132,4 @@ frontend/
 - **Database Issues**: Delete `ev.db` to reset database
 - **Registration Issues**: Check backend logs for password hashing errors
 
-## Local setup
-### 1) Backend dependencies
-1. `cd backend`
-2. `pip install -r requirements.txt`
-
-### 2) Configure environment variables
-Create a `.env` file in the backend directory with your configuration:
-- Database connection settings
-- JWT secret key
-- CORS settings
-- Optional: Stripe payment integration keys
-
-Refer to `backend/.env.example` for configuration format.
-
-### 3) Run the API
-From the `backend` folder:
-- `uvicorn app.main:app --port 8001 --reload`
-
-### 4) Payment Integration (Optional)
-For payment processing, configure your preferred payment provider according to their documentation.
 
