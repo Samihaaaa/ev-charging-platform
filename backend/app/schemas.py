@@ -20,6 +20,7 @@ class StationCreate(BaseModel):
     longitude: float
     charger_type: str
     power_kw: int
+    price_inr: int = 0
 
 
 class StationResponse(BaseModel):
@@ -29,11 +30,17 @@ class StationResponse(BaseModel):
     longitude: float
     charger_type: str
     power_kw: int
+    price_inr: int
 
     class Config:
         from_attributes = True
 
 
 class BookingCreate(BaseModel):
+    station_id: int
+    time_slot: str
+
+
+class CheckoutSessionCreate(BaseModel):
     station_id: int
     time_slot: str

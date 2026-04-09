@@ -106,11 +106,13 @@ card.className = "card";
 
 card.innerHTML = `
 
-<h3>⚡ ${station.name}</h3>
+<h3>?? ${station.name}</h3>
 
 <p>Type: ${station.charger_type}</p>
 
 <p>Power: <b>${station.power_kw} kW</b></p>
+
+<p>Price: <b>??${station.price_inr || 500}</b></p>
 
 <button onclick="viewSlots(${station.id})">
 View Available Slots
@@ -132,11 +134,16 @@ container.appendChild(card);
 
 async function viewSlots(stationId) {
 
+console.log(`Viewing slots for station ${stationId}`);
+
 const res = await fetch(`${API_URL}/stations/${stationId}/available-slots`);
 
 const data = await res.json();
 
+console.log("Available slots response:", data);
+
 const slots = data.available_slots;
+const priceInr = data.price_inr || 500; // Default to 500 INR if not specified
 
 const slotDiv = document.getElementById(`slots-${stationId}`);
 
@@ -153,7 +160,7 @@ slots.forEach(slot => {
 
 const btn = document.createElement("button");
 
-btn.innerText = `Book ${slot}`;
+btn.innerText = `Book ${slot} - ${priceInr} INR`;
 
 btn.className = "slot-btn";
 
@@ -163,6 +170,8 @@ slotDiv.appendChild(btn);
 
 });
 
+console.log(`Displayed ${slots.length} available slots`);
+
 }
 
 
@@ -171,21 +180,14 @@ slotDiv.appendChild(btn);
 
 async function bookSlot(stationId, slot) {
 
-if (!token) {
+console.log(`Booking station ${stationId}, slot ${slot}`);
 
-alert("Please login first");
-window.location.href = "login.html";
-return;
-
-}
-
-const res = await fetch(`${API_URL}/bookings/`, {
+const res = await fetch(`${API_URL}/payments/checkout-session`, {
 
 method: "POST",
 
 headers: {
-"Content-Type": "application/json",
-"Authorization": "Bearer " + token
+"Content-Type": "application/json"
 },
 
 body: JSON.stringify({
@@ -197,16 +199,21 @@ time_slot: slot
 
 const data = await res.json();
 
-if (res.ok) {
+console.log("Booking response:", data);
 
-alert("Booking successful!");
+if (res.ok && data.status === "success") {
 
+alert(`Booking successful! Booking ID: ${data.booking_id}`);
+
+// Refresh stations to update available slots
 loadStations();
+
+// Refresh bookings to show new booking
 loadMyBookings();
 
 } else {
 
-alert(data.detail || "Booking failed");
+alert(data.error || data.detail || "Booking failed");
 
 }
 
@@ -218,21 +225,24 @@ alert(data.detail || "Booking failed");
 
 async function loadMyBookings() {
 
-if (!token) return;
+console.log("Loading my bookings...");
 
-const res = await fetch(`${API_URL}/bookings/my-bookings`, {
-
-headers: {
-"Authorization": "Bearer " + token
-}
-
-});
+const res = await fetch(`${API_URL}/bookings/my-bookings/demo`);
 
 const bookings = await res.json();
+
+console.log("Bookings response:", bookings);
 
 const container = document.getElementById("bookings");
 
 container.innerHTML = "";
+
+if (!bookings || bookings.length === 0) {
+
+container.innerHTML = "<p>No Active Bookings</p>";
+return;
+
+}
 
 bookings.forEach(b => {
 
@@ -242,10 +252,13 @@ div.className = "booking-card";
 
 div.innerHTML = `
 
-<b>Station ID:</b> ${b.station_id}
+<b>Station:</b> ${b.station_name || 'Station ' + b.station_id}
 <br>
 
 <b>Time Slot:</b> ${b.time_slot}
+<br>
+
+<b>Status:</b> ${b.status || 'confirmed'}
 
 <br><br>
 
@@ -259,6 +272,8 @@ container.appendChild(div);
 
 });
 
+console.log(`Displayed ${bookings.length} bookings`);
+
 }
 
 
@@ -267,19 +282,33 @@ container.appendChild(div);
 
 async function cancelBooking(id) {
 
-await fetch(`${API_URL}/bookings/${id}`, {
+console.log(`Cancelling booking ${id}`);
 
-method: "DELETE",
+const res = await fetch(`${API_URL}/bookings/${id}`, {
 
-headers: {
-"Authorization": "Bearer " + token
-}
+method: "DELETE"
 
 });
 
-alert("Booking cancelled");
+const data = await res.json();
 
+console.log("Cancel response:", data);
+
+if (res.ok && data.status === "success") {
+
+alert(`Booking cancelled! Slot ${data.slot_freed} is now available.`);
+
+// Refresh bookings to remove cancelled booking
 loadMyBookings();
+
+// Refresh stations to show freed slot
+loadStations();
+
+} else {
+
+alert(data.detail || "Failed to cancel booking");
+
+}
 
 }
 
