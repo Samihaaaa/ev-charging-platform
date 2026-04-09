@@ -15,6 +15,21 @@ env/
 # Database
 *.db
 *.sqlite3
+*.sqlite
+
+# Test and debug files
+test_*.py
+debug_*.py
+create_*.py
+check_*.py
+diagnose_*.py
+cancel_*.py
+seed_*.py
+startup_*.py
+minimal_*.py
+
+# Old frontend
+frontend-old/
 
 # Logs
 *.log
