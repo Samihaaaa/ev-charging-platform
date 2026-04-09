@@ -81,10 +81,7 @@ cd frontend
 - **API Documentation**: `http://127.0.0.1:8001/docs`
 
 ## Default Login Credentials
-For testing, use these pre-configured accounts:
-- **simple@example.com** / **simple123** (Plain text - immediate login)
-- **demo@example.com** / **demo** (Plain text - immediate login)
-- **fixed@example.com** / **fixed123** (SHA256 hashed)
+For testing, create a new account using the registration form or check the backend database for existing test users.
 
 ## API Endpoints
 ### Authentication
@@ -141,19 +138,18 @@ frontend/
 2. `pip install -r requirements.txt`
 
 ### 2) Configure environment variables
-Set at least:
-- `STRIPE_SECRET_KEY` (Stripe secret key)
-- `STRIPE_WEBHOOK_SECRET` (Stripe webhook signing secret)
-- `DATABASE_URL` (optional; default is `postgresql://postgres:123@localhost/ev_charging`)
+Create a `.env` file in the backend directory with your configuration:
+- Database connection settings
+- JWT secret key
+- CORS settings
+- Optional: Stripe payment integration keys
 
-Optional:
-- `FRONTEND_SUCCESS_URL` / `FRONTEND_CANCEL_URL` (used by Stripe redirect URLs)
+Refer to `backend/.env.example` for configuration format.
 
 ### 3) Run the API
 From the `backend` folder:
 - `uvicorn app.main:app --port 8001 --reload`
 
-### 4) Stripe webhook (local)
-Use the Stripe CLI to forward events to your local server:
-- `stripe listen 8001 --forward-to http://127.0.0.1:8001/payments/stripe-webhook`
+### 4) Payment Integration (Optional)
+For payment processing, configure your preferred payment provider according to their documentation.
 
