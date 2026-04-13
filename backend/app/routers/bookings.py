@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from datetime import datetime, date, timedelta
 from .. import models, schemas
 from ..database import SessionLocal
 from ..auth import get_current_user
@@ -35,6 +36,59 @@ def create_booking(
     user = db.query(models.User).filter(models.User.email == current_user).first()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
+
+    # Validate booking date and time to prevent past bookings
+    try:
+        booking_date = datetime.strptime(booking.booking_date, "%Y-%m-%d").date()
+        today = date.today()
+        
+        if booking_date < today:
+            raise HTTPException(status_code=400, detail="Cannot book past dates")
+        
+        # If booking is for today, check if time slot has passed
+        if booking_date == today:
+            try:
+                # Parse time slot (format like "9am-10am")
+                time_str = booking.time_slot
+                time_range = time_str.split('-')[0]  # Get start time
+                
+                if "am" in time_range.lower() or "pm" in time_range.lower():
+                    # Format like "9am" or "9:30am"
+                    time_clean = time_range.replace(" ", "").lower()
+                    hour = int(time_clean.replace("am", "").replace("pm", ""))
+                    is_pm = "pm" in time_clean
+                    
+                    # Convert to 24-hour format
+                    if is_pm and hour != 12:
+                        hour_24 = hour + 12
+                    elif is_pm and hour == 12:
+                        hour_24 = 12
+                    elif not is_pm and hour == 12:
+                        hour_24 = 0
+                    else:
+                        hour_24 = hour
+                    booking_time = time(hour_24, 0)
+                else:
+                    # Format like "09:00" or "9:00"
+                    if ":" in time_range:
+                        parts = time_range.split(":")
+                        booking_time = time(int(parts[0]), int(parts[1]))
+                    else:
+                        booking_time = time(int(time_range), 0)
+                
+                current_datetime = datetime.now()
+                booking_datetime = datetime.combine(booking_date, booking_time)
+                
+                # Add 30-minute buffer to allow last-minute bookings
+                buffer_minutes = 30
+                if booking_datetime < (current_datetime - timedelta(minutes=buffer_minutes)):
+                    raise HTTPException(status_code=400, detail="Cannot book past time slots")
+                    
+            except ValueError:
+                raise HTTPException(status_code=400, detail="Invalid time slot format")
+                
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid date format. Use YYYY-MM-DD")
 
     has_booking_status = table_has_column("bookings", "status")
     has_amount_cents = table_has_column("bookings", "amount_cents")
@@ -317,15 +371,39 @@ def cancel_booking(
 
     has_booking_status = table_has_column("bookings", "status")
     has_payment_intent = table_has_column("bookings", "payment_intent_id")
+    has_created_at = table_has_column("bookings", "created_at")
 
     if has_booking_status:
-        if has_payment_intent:
+        if has_payment_intent and has_created_at:
             booking_row = (
                 db.query(
                     models.Booking.id,
                     models.Booking.user_id,
                     models.Booking.status,
                     models.Booking.payment_intent_id,
+                    models.Booking.created_at,
+                )
+                .filter(models.Booking.id == booking_id)
+                .first()
+            )
+        elif has_payment_intent:
+            booking_row = (
+                db.query(
+                    models.Booking.id,
+                    models.Booking.user_id,
+                    models.Booking.status,
+                    models.Booking.payment_intent_id,
+                )
+                .filter(models.Booking.id == booking_id)
+                .first()
+            )
+        elif has_created_at:
+            booking_row = (
+                db.query(
+                    models.Booking.id,
+                    models.Booking.user_id,
+                    models.Booking.status,
+                    models.Booking.created_at,
                 )
                 .filter(models.Booking.id == booking_id)
                 .first()
@@ -358,6 +436,20 @@ def cancel_booking(
             status_code=403,
             detail="Not authorized to cancel this booking"
         )
+
+    # Check 30-minute cancellation window
+    if has_created_at and hasattr(booking_row, 'created_at') and booking_row.created_at:
+        current_time = datetime.now()
+        time_difference = current_time - booking_row.created_at
+        
+        # Convert to minutes
+        minutes_passed = time_difference.total_seconds() / 60
+        
+        if minutes_passed > 30:
+            raise HTTPException(
+                status_code=400,
+                detail="Cancellation window expired"
+            )
 
     if has_booking_status:
         # If the booking is already paid, attempt refund when Stripe is configured.

@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, DateTime
+from sqlalchemy.sql import func
 from .database import Base
 
 
@@ -49,3 +50,4 @@ class Booking(Base):
 
     checkout_session_id = Column(String, nullable=True)
     payment_intent_id = Column(String, nullable=True)
+    created_at = Column(DateTime, default=func.now(), nullable=False)

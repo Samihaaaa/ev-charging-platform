@@ -29,10 +29,24 @@ const Dashboard = () => {
       const confirmedBookings = bookingsRes.filter(booking => booking.status === "confirmed");
       console.log("Dashboard: Filtered confirmed bookings:", confirmedBookings.length);
       
+      // Calculate actual total spent based on station prices
+      const totalSpent = confirmedBookings.reduce((sum, booking) => {
+        // Find the station for this booking to get actual price
+        const station = stationsRes.find(s => s.id === booking.station_id);
+        const pricePerHour = station ? station.price_inr : 150; // Default price if station not found
+        
+        console.log("Dashboard: Booking:", booking);
+        console.log("Dashboard: Station found:", station);
+        console.log("Dashboard: Price per hour:", pricePerHour);
+        console.log("Dashboard: Running total:", sum + pricePerHour);
+        
+        return sum + pricePerHour;
+      }, 0);
+      
       const newStats = {
         totalChargers: stationsRes.length,
         activeBookings: confirmedBookings.length,
-        totalSpent: confirmedBookings.length * 500 // Mock data for total spent (₹500 per booking)
+        totalSpent: totalSpent
       };
       
       console.log("Dashboard: New stats:", newStats);

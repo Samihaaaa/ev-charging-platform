@@ -15,6 +15,7 @@ const Chargers = () => {
   const [allSlots, setAllSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const navigate = useNavigate();
   const { token } = useAuth();
 
@@ -91,10 +92,59 @@ const Chargers = () => {
     }
   };
 
+  // Function to check if a time slot is in the past for the selected date
+  const isSlotInPast = (slot) => {
+    const today = new Date();
+    const bookingDate = new Date(selectedDate);
+    
+    // If booking is for a future date, slot is not in past
+    if (bookingDate > today) {
+      return false;
+    }
+    
+    // If booking is for today, check time
+    if (bookingDate.toDateString() === today.toDateString()) {
+      // Parse time slot (format like "9am-10am")
+      const timeRange = slot.split('-')[0]; // Get start time
+      let startTime;
+      
+      if (timeRange.includes('am') || timeRange.includes('pm')) {
+        // Format like "9am" or "9:30am"
+        const timeStr = timeRange.replace(/\s/g, ''); // Remove spaces
+        const hour = parseInt(timeStr.replace(/am|pm/i, ''));
+        const isPM = timeStr.toLowerCase().includes('pm');
+        
+        // Convert to 24-hour format
+        const hour24 = isPM && hour !== 12 ? hour + 12 : (isPM && hour === 12) ? 12 : (!isPM && hour === 12) ? 0 : hour;
+        
+        startTime = new Date(today);
+        startTime.setHours(hour24, 0, 0, 0);
+      } else {
+        // Format like "09:00" or "9:00"
+        const [hours, minutes] = timeRange.split(':').map(Number);
+        startTime = new Date(today);
+        startTime.setHours(hours, minutes || 0, 0, 0);
+      }
+      
+      // Add 30-minute buffer
+      const bufferTime = new Date(startTime.getTime() - 30 * 60000);
+      
+      return bufferTime < today;
+    }
+    
+    return false;
+  };
+
   const handleBook = async (stationId, slot) => {
-    console.log("Booking slot:", { stationId, slot });
+    // Check if slot is in the past
+    if (isSlotInPast(slot)) {
+      alert("Cannot book past time slots");
+      return;
+    }
+    
+    console.log("Booking slot:", { stationId, slot, date: selectedDate });
     try {
-      const data = await api.bookSlot(stationId, slot);
+      const data = await api.bookSlot(stationId, slot, selectedDate);
       console.log("Booking response:", data);
       
       if (data.status === "success") {
@@ -202,33 +252,73 @@ const Chargers = () => {
 
             {activeStationId === charger.id && (
               <div style={{ marginTop: '1rem', padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-color)' }}>
+                {/* Date Picker */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: 500, marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>
+                    Select Booking Date:
+                  </label>
+                  <input 
+                    type="date" 
+                    value={selectedDate}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    style={{ 
+                      padding: '0.5rem', 
+                      border: '1px solid var(--border-color)', 
+                      borderRadius: 'var(--radius-sm)',
+                      fontSize: '0.9rem',
+                      width: '100%',
+                      maxWidth: '200px'
+                    }}
+                  />
+                </div>
+                
                 {loadingSlots ? (
                   <div style={{ textAlign: 'center', fontSize: '0.9rem' }}>Checking slots...</div>
                 ) : allSlots.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
-                    {allSlots.map(slot => {
-                      const isAvailable = availableSlots.includes(slot);
-                      return (
-                        <button 
-                          key={slot} 
-                          disabled={!isAvailable}
-                          className="btn-outline" 
-                          style={{ 
-                            padding: '0.5rem 0.8rem', 
-                            fontSize: '0.85rem',
-                            opacity: isAvailable ? 1 : 0.5,
-                            cursor: isAvailable ? 'pointer' : 'not-allowed',
-                            textDecoration: isAvailable ? 'none' : 'line-through',
-                            backgroundColor: isAvailable ? 'transparent' : 'rgba(0,0,0,0.05)',
-                            borderColor: isAvailable ? 'var(--primary)' : 'var(--border-color)'
-                          }}
-                          onClick={() => handleBook(charger.id, slot)}
-                          title={isAvailable ? `Book ${slot}` : "Slot Booked"}
-                        >
-                          {slot}
-                        </button>
-                      );
-                    })}
+                  <div>
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.8rem' }}>
+                      Available slots for {new Date(selectedDate).toLocaleDateString()}:
+                    </div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {allSlots.map(slot => {
+                        const isAvailable = availableSlots.includes(slot);
+                        const isPast = isSlotInPast(slot);
+                        const isDisabled = !isAvailable || isPast;
+                        
+                        return (
+                          <button 
+                            key={slot} 
+                            disabled={isDisabled}
+                            className="btn-outline" 
+                            style={{ 
+                              padding: '0.5rem 0.8rem', 
+                              fontSize: '0.85rem',
+                              opacity: isDisabled ? 0.4 : 1,
+                              cursor: isDisabled ? 'not-allowed' : 'pointer',
+                              textDecoration: isDisabled ? 'line-through' : 'none',
+                              backgroundColor: isDisabled ? 'rgba(0,0,0,0.05)' : 'transparent',
+                              borderColor: isDisabled ? 'var(--border-color)' : 'var(--primary)',
+                              color: isDisabled ? 'var(--text-muted)' : 'inherit'
+                            }}
+                            onClick={() => !isDisabled && handleBook(charger.id, slot)}
+                            title={
+                              isPast ? "Past time slot - not available" :
+                              !isAvailable ? "Slot already booked" : 
+                              `Book ${slot}`
+                            }
+                          >
+                            {slot}
+                            {isPast && <span style={{ fontSize: '0.7rem', display: 'block' }}>Past</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {isSlotInPast(allSlots[0]) && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', fontStyle: 'italic' }}>
+                        Past time slots are disabled. Select a future date to see all available slots.
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', fontSize: '0.9rem', color: 'var(--danger)' }}>No slots fetched.</div>

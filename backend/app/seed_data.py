@@ -25,7 +25,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.605,
             "charger_type": "DC Fast",
             "power_kw": 150,
-            "price_inr": 800
+            "price_inr": 250
         },
         {
             "name": "Indiranagar Charging Point",
@@ -33,7 +33,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.6408,
             "charger_type": "AC",
             "power_kw": 22,
-            "price_inr": 400
+            "price_inr": 120
         },
         {
             "name": "Whitefield Supercharger",
@@ -41,7 +41,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.7499,
             "charger_type": "DC Fast",
             "power_kw": 250,
-            "price_inr": 1200
+            "price_inr": 350
         },
         {
             "name": "Electronic City Station",
@@ -49,7 +49,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.6602,
             "charger_type": "AC",
             "power_kw": 22,
-            "price_inr": 350
+            "price_inr": 110
         },
         {
             "name": "Koramangala EV Hub",
@@ -57,7 +57,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.6245,
             "charger_type": "DC Fast",
             "power_kw": 120,
-            "price_inr": 900
+            "price_inr": 200
         },
         {
             "name": "Yelahanka Charging Point",
@@ -65,7 +65,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.5963,
             "charger_type": "AC",
             "power_kw": 11,
-            "price_inr": 300
+            "price_inr": 80
         },
         {
             "name": "Jayanagar Eco Station",
@@ -73,7 +73,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.5938,
             "charger_type": "DC Fast",
             "power_kw": 60,
-            "price_inr": 700
+            "price_inr": 180
         },
         {
             "name": "HSR Layout Supercharger",
@@ -81,7 +81,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.6446,
             "charger_type": "DC Fast",
             "power_kw": 200,
-            "price_inr": 1000
+            "price_inr": 300
         },
         {
             "name": "Malleshwaram Hub",
@@ -89,7 +89,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.5700,
             "charger_type": "AC",
             "power_kw": 22,
-            "price_inr": 450
+            "price_inr": 130
         },
         {
             "name": "Marathahalli Fast Charge",
@@ -97,7 +97,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.7011,
             "charger_type": "DC Fast",
             "power_kw": 150,
-            "price_inr": 850
+            "price_inr": 260
         },
         {
             "name": "Bannerghatta Road Station",
@@ -105,7 +105,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.5953,
             "charger_type": "AC",
             "power_kw": 22,
-            "price_inr": 380
+            "price_inr": 115
         },
         {
             "name": "Domlur Charging Center",
@@ -113,7 +113,7 @@ def get_bangalore_ev_stations() -> List[Dict[str, Any]]:
             "longitude": 77.6371,
             "charger_type": "DC Fast",
             "power_kw": 100,
-            "price_inr": 750
+            "price_inr": 190
         }
     ]
 

@@ -39,6 +39,7 @@ class StationResponse(BaseModel):
 class BookingCreate(BaseModel):
     station_id: int
     time_slot: str
+    booking_date: str  # Format: "YYYY-MM-DD"
 
 
 class CheckoutSessionCreate(BaseModel):
